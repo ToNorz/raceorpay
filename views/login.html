@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Achronous // Sign In</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="auth-card">
+    <div class="brand">
+      <h1>ACHRONOUS BANK</h1>
+      <p>Beyond Time</p>
+    </div>
+
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input type="text" id="username" name="username" autocomplete="username" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" autocomplete="current-password" required>
+
+      <button type="submit" class="primary">Sign In</button>
+    </form>
+
+    <div id="msg" class="msg"></div>
+
+    <div class="switch-link">
+      New here? <a href="/register">Create an account</a>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      msg.className = 'msg';
+      msg.textContent = '';
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          msg.className = 'msg error';
+          msg.textContent = data.error || 'Login failed.';
+          return;
+        }
+
+        // Token is also set as an httpOnly cookie by the server;
+        // stash it client-side too in case the dashboard needs it.
+        if (data.token) {
+          localStorage.setItem('token', data.token);
+        }
+        window.location.href = '/dashboard';
+      } catch (err) {
+        msg.className = 'msg error';
+        msg.textContent = 'Network error. Please try again.';
+      }
+    });
+  </script>
+</body>
+</html>
