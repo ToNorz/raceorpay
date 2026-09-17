@@ -46,8 +46,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong.' });
 });
 
-mongoose.connection.once('open', () => {
-  app.listen(PORT, () => {
-    console.log(`Achronous: Beyond Time — Bank Transfer running on port ${PORT}`);
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((err) => {
+    console.error('MongoDB connection error:', err.message);
+    process.exit(1);
   });
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Achronous: Beyond Time — Bank Transfer running on port ${PORT}`);
 });
